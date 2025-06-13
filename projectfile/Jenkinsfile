@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'harshj2003/cicd-jenkins-ansible:latest'
-        DOCKER_USERNAME = 'harshj2003'
-        DOCKER_TOKEN = 'dckr_pat_dD0DeIS5wwtNW1Iz1f2SNWgdDgs'  // 🔐 Replace with your actual token
     }
 
     stages {
@@ -22,7 +20,9 @@ pipeline {
 
         stage('Login to DockerHub') {
             steps {
-                sh 'echo $DOCKER_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                }
             }
         }
 
@@ -34,10 +34,9 @@ pipeline {
 
         stage('Deploy via Ansible') {
             steps {
-                // Optional: ensure the SSH private key is available and permissions are correct
                 sh '''
                     chmod 600 ~/.ssh/id_rsa
-                    ansible-playbook all -i inventory.ini playbook.yaml
+                    ansible-playbook -i inventory.ini playbook.yaml
                 '''
             }
         }
