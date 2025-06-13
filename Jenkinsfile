@@ -46,7 +46,7 @@ pipeline {
                 // Inject DockerHub credentials as extra-vars into Ansible playbook
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh '''
-                        ansible-playbook -i inventory.ini playbook.yaml \
+                        /home/ubuntu/.local/bin/ansible-playbook -i inventory.ini playbook.yaml \
                         --extra-vars "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
                     '''
                 }
