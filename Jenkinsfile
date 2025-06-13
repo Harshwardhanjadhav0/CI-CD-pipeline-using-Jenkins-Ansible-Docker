@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/Harshwardhanjadhav0/CI-CD-pipeline-using-Jenkins-Ansible-Docker.git'
+                git branch: 'main', url: 'https://github.com/Harshwardhanjadhav0/CI-CD-pipeline-using-Jenkins-Ansible-Docker.git'
             }
         }
 
