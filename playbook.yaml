@@ -1,34 +1,39 @@
 - hosts: targets
   become: yes
   vars:
-    ansible_python_interpreter: ~/.ansible_venv/bin/python
     docker_username: harshj2003
-    docker_password: your_password_here  # Replace or store securely in Vault
+    docker_password: your_password_here  # Use Jenkins credentials injection for real deployments
 
   tasks:
-    - name: Install Docker (if not installed)
+    - name: Ensure Docker is installed
       apt:
         name: docker.io
         state: present
         update_cache: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Login to DockerHub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
       args:
         executable: /bin/bash
 
-    - name: Pull Docker image
+    - name: Pull latest Docker image
       shell: docker pull harshj2003/cicd-jenkins-ansible:latest
       args:
         executable: /bin/bash
 
-    - name: Stop and remove existing container (if running)
+    - name: Stop and remove existing container if running
       shell: |
         docker ps -q --filter "name=myapp" | grep -q . && docker rm -f myapp || true
       args:
         executable: /bin/bash
 
-    - name: Run container
+    - name: Run the container
       shell: docker run -d --name myapp -p 80:5000 harshj2003/cicd-jenkins-ansible:latest
       args:
         executable: /bin/bash
