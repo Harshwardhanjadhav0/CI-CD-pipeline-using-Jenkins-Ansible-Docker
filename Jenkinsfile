@@ -41,7 +41,6 @@ pipeline {
 
         stage('Deploy via Ansible') {
             steps {
-                // Inject both SSH key and DockerHub credentials
                 withCredentials([
                     sshUserPrivateKey(
                         credentialsId: 'target-ec2-key',
@@ -56,8 +55,8 @@ pipeline {
                     sh '''
                         echo "Running Ansible Playbook..."
                         /usr/bin/ansible-playbook -i inventory.ini playbook.yaml \
-                        --private-key $SSH_KEY \
-                        --extra-vars "docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
+                          --private-key $SSH_KEY \
+                          -e "ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY docker_username=$DOCKER_USERNAME docker_password=$DOCKER_PASSWORD"
                     '''
                 }
             }
