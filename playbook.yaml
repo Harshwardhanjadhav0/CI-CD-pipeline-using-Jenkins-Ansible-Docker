@@ -1,7 +1,9 @@
----
-- name: Deploy Docker container on target EC2
-  hosts: targets
+- hosts: targets
   become: yes
+  vars:
+    ansible_python_interpreter: ~/.ansible_venv/bin/python
+    docker_username: harshj2003
+    docker_password: your_password_here  # Replace or store securely in Vault
 
   tasks:
     - name: Install Docker (if not installed)
@@ -12,14 +14,22 @@
 
     - name: Login to DockerHub
       shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
+      args:
+        executable: /bin/bash
 
     - name: Pull Docker image
       shell: docker pull harshj2003/cicd-jenkins-ansible:latest
+      args:
+        executable: /bin/bash
 
     - name: Stop and remove existing container (if running)
       shell: |
         docker ps -q --filter "name=myapp" | grep -q . && docker rm -f myapp || true
+      args:
+        executable: /bin/bash
 
     - name: Run container
       shell: docker run -d --name myapp -p 80:5000 harshj2003/cicd-jenkins-ansible:latest
+      args:
+        executable: /bin/bash
 
