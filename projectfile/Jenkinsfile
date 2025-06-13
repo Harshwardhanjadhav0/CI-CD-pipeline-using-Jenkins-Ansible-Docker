@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'harshj2003/cicd-jenkins-ansible:latest'
+        DOCKER_USERNAME = 'harshj2003'
+        DOCKER_TOKEN = 'dckr_pat_dD0DeIS5wwtNW1Iz1f2SNWgdDgs'  // 🔐 Replace with your actual token
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/Harshwardhanjadhav0/CI-CD-pipeline-using-Jenkins-Ansible-Docker.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                sh 'echo $DOCKER_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                sh 'docker push $DOCKER_IMAGE'
+            }
+        }
+
+        stage('Deploy via Ansible') {
+            steps {
+                // Optional: ensure the SSH private key is available and permissions are correct
+                sh '''
+                    chmod 600 ~/.ssh/id_rsa
+                    ansible-playbook all -i inventory.ini playbook.yaml
+                '''
+            }
+        }
+    }
+}
+

@@ -1,0 +1,24 @@
+---
+- name: Deploy Docker container on target EC2
+  hosts: targets
+  become: yes
+
+  tasks:
+    - name: Install Docker (if not installed)
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Login to DockerHub
+      shell: echo "{{ docker_password }}" | docker login -u "{{ docker_username }}" --password-stdin
+      vars:
+        docker_username: harshj2003
+        docker_password: dckr_pat_dD0DeIS5wwtNW1Iz1f2SNWgdDgs
+
+    - name: Pull Docker image
+      shell: docker pull harshj2003/cicd-jenkins-ansible:latest
+
+    - name: Run container
+      shell: docker run -d --name myapp -p 80:5000 harshj2003/cicd-jenkins-ansible:latest
+
